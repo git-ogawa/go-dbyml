@@ -1,0 +1,22 @@
+---
+image:
+  name: go-dbyml-sample
+  tag: latest
+  path: .
+  dockerfile: Dockerfile
+  build_args:
+    key1: this is key1
+  label:
+    label1: test label
+  docker_host: unix:/var/run/docker.sock
+
+build:
+  target: ''
+  no_cache: false
+  verbose: true
+
+registry:
+  enabled: false
+  host: myregistry.com:5000
+  project:
+  auth:
