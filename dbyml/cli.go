@@ -32,7 +32,7 @@ type CLIoptions struct {
 }
 
 // GetArgs gets cli options from user inputs.
-func GetArgs() (options CLIoptions) {
+func GetArgs() (CLIoptions, bool) {
 	desc := "Dbyml is a CLI tool to build a docker image with the arguments loaded from configs in yaml.\n\n"
 	desc += "Passing the config file where the arguments are listed to build the image from your dockerfile,\n"
 	desc += "push it to the docker registry.\n\n"
@@ -78,11 +78,11 @@ func GetArgs() (options CLIoptions) {
 	}
 
 	if *Version {
-		fmt.Println("go-dbyml v0.0.1")
-		os.Exit(0)
+		ShowVersion()
+		return CLIoptions{}, false
 	}
 
-	return CLIoptions{*Config, *Init}
+	return CLIoptions{*Config, *Init}, true
 }
 
 // Parse checks the input options, run actions according to the options.
@@ -122,9 +122,14 @@ func ExecBuild(path string) {
 	fmt.Println()
 	PrintCenter("Build start", 30, "-")
 	fmt.Println()
-	config.ImageInfo.Build()
-	fmt.Println()
+	err := config.ImageInfo.Build()
 	PrintCenter("Build finish", 30, "-")
+	fmt.Println()
+	if err != nil {
+		fmt.Printf("Error has occurred during build: %v\n", err)
+		fmt.Println("\x1b[31mBuild Failed\x1b[0m")
+		os.Exit(1)
+	}
 
 	fmt.Printf("Image %v successfully built.\n", config.ImageInfo.ImageName)
 
@@ -132,11 +137,17 @@ func ExecBuild(path string) {
 		fmt.Println()
 		PrintCenter("Push start", 30, "-")
 		fmt.Println()
-		config.ImageInfo.Push()
+		err = config.ImageInfo.Push()
 		fmt.Println()
 		PrintCenter("Push finish", 30, "-")
 
-		fmt.Printf("Image %v successfully pushed.\n", config.ImageInfo.FullName)
+		fmt.Println()
+		if err != nil {
+			fmt.Printf("Error has occurred during push: %v\n", err)
+			fmt.Println("\x1b[31mPush Failed\x1b[0m")
+			os.Exit(1)
+		}
 
+		fmt.Printf("Image %v successfully pushed.\n", config.ImageInfo.FullName)
 	}
 }

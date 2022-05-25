@@ -24,6 +24,7 @@ type RegistryInfo struct {
 	Auth map[string]string `yaml:"auth"`
 }
 
+// NewRegistryInfo creates a new RegistryInfo struct with default values.
 func NewRegistryInfo() *RegistryInfo {
 	registry := new(RegistryInfo)
 	registry.Enabled = false
