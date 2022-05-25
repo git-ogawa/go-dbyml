@@ -1,0 +1,48 @@
+image:
+  name: aaa
+  tag: v2
+  path: testdata
+  dockerfile: Dockerfile
+  build_args:
+    key1: made by go-dev
+    key2: value2
+  label:
+    label1: label-var1
+    label2: label-var2
+  docker_host: unix:/var/run/docker.sock
+
+build:
+  target: ''
+  # target: stage1
+  stdout: true
+  no_cache: false
+  remove_intermediate_container: true
+  force_rm: true
+  remove_dangling: true
+  verbose: true
+
+registry:
+  enabled: true
+  host: 172.23.0.8:5000
+  # host: 172.23.0.50:5000
+  project: public
+  auth:
+    username: "docker"
+    password: "docker"
+    ca_cert: "cert"
+
+buildx:
+  enabled: false
+  debug: false
+  instance: multi-builder
+  use_existing_instance: true
+  platform:
+  - linux/amd64
+  - linux/arm64
+  type: registry
+  pull_output: true
+  remove_instance: false
+  driver_opt:
+    network: host
+  config:
+    http: true

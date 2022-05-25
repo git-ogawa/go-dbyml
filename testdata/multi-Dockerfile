@@ -1,0 +1,18 @@
+# syntax=docker/dockerfile:1
+FROM alpine:latest AS stage1
+
+ARG key1
+RUN echo "$key1" > stage1.txt && \
+    cat stage1.txt
+
+
+FROM stage1 AS stage2
+
+RUN echo "this is stage2" >> stage2.txt && \
+    cat stage2.txt
+
+
+FROM stage2 AS stage3
+
+RUN echo "this is stage3" >> stage3.txt && \
+    ls *.txt

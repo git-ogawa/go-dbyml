@@ -1,0 +1,49 @@
+name: build
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - closed
+  push:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        language: ['go']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # - name: Install dependencies
+      #   run: |
+      #     go install honnef.co/go/tools/cmd/staticcheck@2022.1
+
+      - name: Format
+        run: go fmt dbyml/*.go
+
+      - name: Staticcheck
+        uses: dominikh/staticcheck-action@v1.2.0
+        with:
+          version: "2022.1.1"
+
+      - name: Go test
+        run: |
+          mkdir -p output/cov
+          go test -coverprofile=cover.out -v dbyml/*
+          go tool cover -html=cover.out -o output/cov/cover.html
+
+      - name: Build
+        run:
+          go build .
+
+      - name: Upload coverage result
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage-report
+          path: ./output/*
