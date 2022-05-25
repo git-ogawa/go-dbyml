@@ -1,0 +1,31 @@
+---
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+  # packages: write
+  # issues: write
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        language: ['go']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install goreleaser
+        run: go install github.com/goreleaser/goreleaser@latest
+
+      - name: Release
+        run: |
+          goreleaser release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

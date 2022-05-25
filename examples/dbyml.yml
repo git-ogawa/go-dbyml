@@ -18,5 +18,5 @@ build:
 registry:
   enabled: false
   host: myregistry.com:5000
-  project:
+  project: public
   auth:
