@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
-	"log"
 	"os"
 	"reflect"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/jsonmessage"
+	"github.com/moby/term"
 )
 
 // ImageInfo defines docker image information.
@@ -36,13 +36,14 @@ type ImageInfo struct {
 	// Labels to be passed to image on build
 	Labels map[string]string `yaml:"label"`
 
-	// Docker host such as "unix:/var/run/docker.sock"
+	// Docker host such as "unix:///var/run/docker.sock"
 	DockerHost string `yaml:"docker_host"`
 
-	FilePath  string
-	Registry  RegistryInfo
-	BuildInfo BuildInfo
-	FullName  string
+	FilePath     string
+	Registry     RegistryInfo
+	BuildInfo    BuildInfo
+	FullName     string
+	DockerClient *client.Client
 }
 
 func NewImageInfo() *ImageInfo {
@@ -50,7 +51,7 @@ func NewImageInfo() *ImageInfo {
 	image.Tag = "latest"
 	image.Path = "."
 	image.Dockerfile = "Dockerfile"
-	image.DockerHost = ""
+	image.DockerHost = "unix:///var/run/docker.sock"
 	image.FilePath = image.Path + "/" + image.Dockerfile
 	image.Registry = *NewRegistryInfo()
 	image.BuildInfo = *NewBuildInfo()
@@ -60,6 +61,15 @@ func NewImageInfo() *ImageInfo {
 func (image *ImageInfo) SetProperties() {
 	image.ImageName = image.Basename + ":" + image.Tag
 	image.FilePath = image.Path + "/" + image.Dockerfile
+	image.SetDockerClient()
+}
+
+// SetDockerClient initializes docker api client for the specified host.
+func (image *ImageInfo) SetDockerClient() {
+	image.DockerClient, _ = client.NewClientWithOpts(
+		client.WithHost(image.DockerHost),
+		client.WithAPIVersionNegotiation(),
+	)
 }
 
 // ShowProperties shows the current settings related to image build.
@@ -79,12 +89,7 @@ func (image ImageInfo) ShowProperties() {
 }
 
 // Build runs image build.
-func (image *ImageInfo) Build() {
-	cli, err := client.NewClientWithOpts(client.FromEnv)
-	if err != nil {
-		panic(err)
-	}
-
+func (image *ImageInfo) Build() error {
 	buf := GetTarContext(image.FilePath)
 	tar := bytes.NewReader(buf.Bytes())
 	ctx := context.Background()
@@ -100,18 +105,18 @@ func (image *ImageInfo) Build() {
 		Tags:       []string{image.ImageName},
 	}
 
-	res, err := cli.ImageBuild(ctx, tar, options)
+	res, err := image.DockerClient.ImageBuild(ctx, tar, options)
 	if err != nil {
-		log.Fatal(err, " :unable to build docker image")
+		return err
 	}
 	defer res.Body.Close()
 
-	_, err = io.Copy(os.Stdout, res.Body)
-	if err != nil {
-		log.Fatal(err, " :unable to read image build response")
-	}
+	termFd, isTerm := term.GetFdInfo(os.Stderr)
+	err = jsonmessage.DisplayJSONMessagesStream(res.Body, os.Stderr, termFd, isTerm, nil)
+	return err
 }
 
+// SetFullImageName sets image name for pushing to a registry.
 func (image *ImageInfo) SetFullImageName() {
 	if image.Registry.Project != "" {
 		image.FullName = image.Registry.Host + "/" + image.Registry.Project + "/" + image.ImageName
@@ -120,40 +125,31 @@ func (image *ImageInfo) SetFullImageName() {
 	}
 }
 
-// AddTag add a tag containing the registry  image to a built image.
-func (image *ImageInfo) AddTag() {
-	cli, err := client.NewClientWithOpts(client.FromEnv)
-	if err != nil {
-		panic(err)
-	}
-	ctx := context.Background()
-	image.SetFullImageName()
-
-	err = cli.ImageTag(ctx, image.ImageName, image.FullName)
-	if err != nil {
-		log.Fatal(err, " :unable to add tag")
-	}
-}
-
 // Push runs image push to a registry.
-func (image *ImageInfo) Push() {
-	cli, err := client.NewClientWithOpts(client.FromEnv)
-	if err != nil {
-		panic(err)
-	}
-
+func (image *ImageInfo) Push() error {
 	ctx := context.Background()
 	image.AddTag()
 
 	opts := types.ImagePushOptions{All: false, RegistryAuth: image.Registry.BasicAuth()}
 
-	res, err := cli.ImagePush(ctx, image.FullName, opts)
+	res, err := image.DockerClient.ImagePush(ctx, image.FullName, opts)
 	if err != nil {
-		log.Fatal(err, " :unable to push docker image")
+		return err
 	}
+	defer res.Close()
 
-	_, err = io.Copy(os.Stdout, res)
+	termFd, isTerm := term.GetFdInfo(os.Stderr)
+	err = jsonmessage.DisplayJSONMessagesStream(res, os.Stderr, termFd, isTerm, nil)
+	return err
+}
+
+// AddTag adds a tag containing the registry name to a built image.
+func (image *ImageInfo) AddTag() {
+	ctx := context.Background()
+	image.SetFullImageName()
+
+	err := image.DockerClient.ImageTag(ctx, image.ImageName, image.FullName)
 	if err != nil {
-		log.Fatal(err, " :unable to read image build response")
+		panic(err)
 	}
 }

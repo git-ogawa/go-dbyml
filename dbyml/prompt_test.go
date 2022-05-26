@@ -12,9 +12,7 @@ func TestNonInteractiveConfig(t *testing.T) {
 	os.Chdir(root)
 
 	options := CLIoptions{"", true}
-	// options.Parse()
 	options.Parse()
-	// stdout := extractStdout(t, options.Parse)
 	_, err := os.Stat("dbyml.yml")
 	if err == nil {
 		os.Remove("dbyml.yml")

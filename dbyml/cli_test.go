@@ -16,7 +16,6 @@ func TestConfigNotFound(t *testing.T) {
 	os.Chdir(root)
 
 	options := CLIoptions{"", false}
-	// options.Parse()
 	stdout := extractStdout(t, options.Parse)
 	expected := "Config file not found in the current directory.\n"
 	expected += "Run the following commands to generate config file.\n\n"
@@ -37,24 +36,20 @@ func TestConfigNotFound(t *testing.T) {
 // 	testArgs := []string{"dbyml", "-h"}
 // 	os.Args = testArgs
 
-// 	options := GetArgs()
-// 	stdout := extractStdout(t, options.Parse)
-
-// 	expected := "Dbyml is a CLI tool to build your docker image with the arguments loaded from configs in yaml.\n\n"
-// 	expected += "Passing the config file where the arguments are listed to build the image from your dockerfile,\n"
-// 	expected += "push it to the docker registry.\n\n"
-// 	expected += "To make sample config file, run the following command.\n\n"
-// 	expected += "$ dbyml --init\n\n"
-// 	expected += "Optional arguments:\n"
-// 	expected += "  -h, --help            Print help information\n"
-// 	expected += "  -c, --config          Path to config file.\n"
-// 	expected += "	  --init            Generate config.\n"
-// 	expected += "  -v, --version         Show version.\n"
-
-// 	assert.Equal(t, expected, stdout)
-
+// 	options, _ := GetArgs()
+// 	options.Parse()
 // 	os.Args = org
 // }
+
+func TestShowVersion(t *testing.T) {
+	org := os.Args
+	testArgs := []string{"dbyml", "-v"}
+	os.Args = testArgs
+
+	options, _ := GetArgs()
+	options.Parse()
+	os.Args = org
+}
 
 func TestCLIBuild(t *testing.T) {
 	pwd, _ := os.Getwd()
@@ -67,7 +62,7 @@ func TestCLIBuild(t *testing.T) {
 	testArgs := []string{"dbyml", "-c", path}
 	os.Args = testArgs
 
-	options := GetArgs()
+	options, _ := GetArgs()
 	options.Parse()
 
 	os.Args = org

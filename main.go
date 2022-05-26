@@ -5,6 +5,8 @@ import (
 )
 
 func main() {
-	o := dbyml.GetArgs()
-	o.Parse()
+	cli, exec := dbyml.GetArgs()
+	if exec {
+		cli.Parse()
+	}
 }
