@@ -18,8 +18,8 @@ build:
   verbose: true
 
 registry:
-  enabled: false
-  host: 172.23.0.8:5000
+  enabled: true
+  host: localhost:5550
   project: public
   auth:
     username: "docker"

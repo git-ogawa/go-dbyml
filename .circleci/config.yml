@@ -1,0 +1,26 @@
+version: 2.1
+
+executors:
+  ubuntu:
+    machine:
+      image: ubuntu-2004:202201-02
+    working_directory: ~/project
+
+jobs:
+  build:
+    executor: ubuntu
+    steps:
+      - checkout
+
+      - run:
+          name: Create docker containers
+          command: docker-compose --project-directory testdata -f testdata/docker-compose.yml up -d
+
+      - run:
+          name: Go test
+          command: |
+            go test  -coverprofile=cover.out dbyml/* -v
+            go tool cover -html=cover.out -o /tmp/cover.html
+
+      - store_artifacts:
+          path: /tmp/cover.html
