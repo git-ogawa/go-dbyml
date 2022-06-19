@@ -86,7 +86,7 @@ func GetArgs() (CLIoptions, bool) {
 // Parse checks the input options, run actions according to the options.
 func (options *CLIoptions) Parse() {
 	if options.Init {
-		config := GetUserInput()
+		config := NewConfiguration()
 		MakeTemplate(config)
 		return
 	}

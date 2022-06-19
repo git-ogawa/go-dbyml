@@ -54,16 +54,6 @@ func PrintCenter(s string, w int, padding string) {
 	fmt.Printf("%v%v%v\n", side, center, side)
 }
 
-func showArrayElement(name string, values []string) {
-	for i, v := range values {
-		if i == 0 {
-			fmt.Printf("%-30v: %v\n", name, v)
-		} else {
-			fmt.Printf("%-30v: %v\n", "", v)
-		}
-	}
-}
-
 func showMapElement(name string, iter *reflect.MapIter) {
 	cnt := 0
 	for iter.Next() {
@@ -82,21 +72,4 @@ func showMapElement(name string, iter *reflect.MapIter) {
 		}
 		cnt++
 	}
-}
-
-func splitString(s string) (k, v string) {
-	arr := strings.Split(s, ":")
-	if len(arr) == 2 {
-		return strings.TrimSpace(arr[0]), strings.TrimSpace(arr[1])
-	}
-	panic("this is no")
-}
-
-func splitStringPointer(s string) (k string, v *string) {
-	arr := strings.Split(s, ":")
-	if len(arr) == 2 {
-		ptr := strings.TrimSpace(arr[1])
-		return strings.TrimSpace(arr[0]), &ptr
-	}
-	panic("this is no")
 }

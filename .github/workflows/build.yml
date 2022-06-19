@@ -42,12 +42,6 @@ jobs:
         with:
           version: v1.29
 
-      - name: Go test
-        run: |
-          mkdir -p output/cov
-          go test -coverprofile=cover.out -v dbyml/*
-          go tool cover -html=cover.out -o output/cov/cover.html
-
       - name: Build
         run:
           go build .
