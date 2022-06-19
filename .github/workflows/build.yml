@@ -18,6 +18,10 @@ jobs:
       matrix:
         language: ['go']
     steps:
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -33,18 +37,12 @@ jobs:
         with:
           version: "2022.1.1"
 
-      - name: Go test
-        run: |
-          mkdir -p output/cov
-          go test -coverprofile=cover.out -v dbyml/*
-          go tool cover -html=cover.out -o output/cov/cover.html
+      - name: Golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.29
 
       - name: Build
         run:
           go build .
 
-      - name: Upload coverage result
-        uses: actions/upload-artifact@v2
-        with:
-          name: coverage-report
-          path: ./output/*

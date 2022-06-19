@@ -1,0 +1,38 @@
+version: '3'
+services:
+  go-registry:
+    image: registry:latest
+    container_name: go-registry
+    hostname: go-registry
+    ports:
+      - "5550:5000"
+    environment:
+      - REGISTRY_STORAGE_DELETE_ENABLED=true
+    networks:
+      go-network:
+        ipv4_address: 192.168.200.2
+  # go-auth-registry:
+  #   image: registry:latest
+  #   container_name: go-auth-registry
+  #   hostname: go-auth-registry
+  #   ports:
+  #     - "5551:5000"
+  #   volumes:
+  #     - ./auth:/auth
+  #   environment:
+  #     - REGISTRY_STORAGE_DELETE_ENABLED=true
+  #     - REGISTRY_AUTH=htpasswd
+  #     - REGISTRY_AUTH_HTPASSWD_REALM=Registry Realm
+  #     - REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd
+  #   networks:
+  #     go-network:
+  #       ipv4_address: 192.168.200.3
+
+networks:
+  go-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.200.0/24
+          gateway: 192.168.200.1
