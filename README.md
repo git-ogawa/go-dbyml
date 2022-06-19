@@ -1,5 +1,6 @@
 # go-dbyml
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/e0c7592da9d04a6391e28ebb1f8a0840)](https://app.codacy.com/gh/git-ogawa/go-dbyml?utm_source=github.com&utm_medium=referral&utm_content=git-ogawa/go-dbyml&utm_campaign=Badge_Grade_Settings)
 [![License](https://img.shields.io/github/license/git-ogawa/go-dbyml)](https://github.com/git-ogawa/go-dbyml/blob/main/LICENSE)
 [![build](https://github.com/git-ogawa/go-dbyml/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/git-ogawa/go-dbyml/actions/workflows/build.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/git-ogawa/go-dbyml)](https://goreportcard.com/report/github.com/git-ogawa/go-dbyml)
