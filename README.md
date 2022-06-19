@@ -4,14 +4,15 @@
 [![build](https://github.com/git-ogawa/go-dbyml/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/git-ogawa/go-dbyml/actions/workflows/build.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/git-ogawa/go-dbyml)](https://goreportcard.com/report/github.com/git-ogawa/go-dbyml)
 [![Release](https://img.shields.io/github/v/release/git-ogawa/go-dbyml)](https://github.com/git-ogawa/go-dbyml/releases)
-
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/86cff2a078d0455f945951c4474e9424)](https://www.codacy.com/gh/git-ogawa/go-dbyml/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=git-ogawa/go-dbyml&amp;utm_campaign=Badge_Grade)
+[![git-ogawa](https://circleci.com/gh/git-ogawa/go-dbyml.svg?style=svg)](https://circleci.com/gh/git-ogawa/go-dbyml)
 
 Go-dbyml is a CLI tool to build a docker image with build options loaded from yaml. Instead of running the `docker build` with many options, write options in config file, build your docker image with them. It helps you to manage build process more readable and flexible.
 
 Go-dbyml is a substitute of [git-ogawa/dbyml](https://github.com/git-ogawa/dbyml) with golang.
 
 
-## Install 
+## Install
 Install with `go install`.
 ```
 go install github.com/git-ogawa/go-dbyml@latest
@@ -76,14 +77,14 @@ The host and port has been merged in host field, so set the format as "hostname:
 ```diff
 registry:
     enabled: true
--    host: "myregistry" # Registry hostname or ip address 
+-    host: "myregistry" # Registry hostname or ip address
 -    port: "5000" # Registry port
 +    host: "myregistry:5000"
 ```
 
 
 ### Buildx section
-The multi-platform build using `buildx` does not be supported yet, so buildx section in config file does not work now. 
+The multi-platform build using `buildx` does not be supported yet, so buildx section in config file does not work now.
 
 
 ### TLS section
