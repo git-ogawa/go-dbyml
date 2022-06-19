@@ -1,0 +1,4 @@
+# Options for analysis running.
+run:
+  tests: false
+  go: '1.18'

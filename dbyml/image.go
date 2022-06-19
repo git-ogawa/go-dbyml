@@ -46,6 +46,7 @@ type ImageInfo struct {
 	DockerClient *client.Client
 }
 
+// NewImageInfo creates a new ImageInfo struct with default values.
 func NewImageInfo() *ImageInfo {
 	image := new(ImageInfo)
 	image.Tag = "latest"
@@ -58,6 +59,7 @@ func NewImageInfo() *ImageInfo {
 	return image
 }
 
+// SetProperties sets some properties when build an image.
 func (image *ImageInfo) SetProperties() {
 	image.ImageName = image.Basename + ":" + image.Tag
 	image.FilePath = image.Path + "/" + image.Dockerfile
@@ -81,7 +83,7 @@ func (image ImageInfo) ShowProperties() {
 		kind := field.Type.Kind()
 		value := rv.FieldByName(field.Name)
 		if kind == reflect.Map || kind == reflect.Slice {
-			ShowMapElement(field.Name, value.MapRange())
+			showMapElement(field.Name, value.MapRange())
 		} else if kind == reflect.String && value.Interface() != "" {
 			fmt.Printf("%-30v: %v\n", field.Name, value)
 		}
@@ -90,7 +92,7 @@ func (image ImageInfo) ShowProperties() {
 
 // Build runs image build.
 func (image *ImageInfo) Build() error {
-	buf := GetTarContext(image.FilePath)
+	buf := getTarContext(image.FilePath)
 	tar := bytes.NewReader(buf.Bytes())
 	ctx := context.Background()
 

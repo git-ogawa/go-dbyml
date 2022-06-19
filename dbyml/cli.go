@@ -1,18 +1,16 @@
-/*
-Dbyml is a CLI tool to build a docker image with the arguments loaded from configs in yaml.
-
-Usage
-
-The following command will generate a configuration file.
-	dbyml --init
-
-The configuration file where the about image build is written.
-
-	dbyml
-
-The options on image build can be written in the config.
-See https://github.com/git-ogawa/dbyml how to edit contents in config file.
-*/
+// Dbyml is a CLI tool to build a docker image with the arguments loaded from configs in yaml.
+//
+// Usage
+//
+// The following command will generate a configuration file.
+// 	dbyml --init
+//
+// The configuration file where the about image build is written.
+//
+// 	dbyml
+//
+// The options on image build can be written in the config.
+// See https://github.com/git-ogawa/dbyml how to edit contents in config file.
 package dbyml
 
 import (

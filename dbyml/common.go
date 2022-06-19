@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-func GetTarContext(dockerFile string) (buf *bytes.Buffer) {
+func getTarContext(dockerFile string) (buf *bytes.Buffer) {
 	buf = new(bytes.Buffer)
 	tw := tar.NewWriter(buf)
 	defer tw.Close()
@@ -54,7 +54,7 @@ func PrintCenter(s string, w int, padding string) {
 	fmt.Printf("%v%v%v\n", side, center, side)
 }
 
-func ShowArrayElement(name string, values []string) {
+func showArrayElement(name string, values []string) {
 	for i, v := range values {
 		if i == 0 {
 			fmt.Printf("%-30v: %v\n", name, v)
@@ -64,7 +64,7 @@ func ShowArrayElement(name string, values []string) {
 	}
 }
 
-func ShowMapElement(name string, iter *reflect.MapIter) {
+func showMapElement(name string, iter *reflect.MapIter) {
 	cnt := 0
 	for iter.Next() {
 		if iter.Value().Kind() == reflect.Ptr {
@@ -80,7 +80,7 @@ func ShowMapElement(name string, iter *reflect.MapIter) {
 				fmt.Printf("%-30v: %v: %v\n", "", iter.Key(), iter.Value())
 			}
 		}
-		cnt += 1
+		cnt++
 	}
 }
 
@@ -88,9 +88,8 @@ func splitString(s string) (k, v string) {
 	arr := strings.Split(s, ":")
 	if len(arr) == 2 {
 		return strings.TrimSpace(arr[0]), strings.TrimSpace(arr[1])
-	} else {
-		panic("this is no")
 	}
+	panic("this is no")
 }
 
 func splitStringPointer(s string) (k string, v *string) {
@@ -98,7 +97,6 @@ func splitStringPointer(s string) (k string, v *string) {
 	if len(arr) == 2 {
 		ptr := strings.TrimSpace(arr[1])
 		return strings.TrimSpace(arr[0]), &ptr
-	} else {
-		panic("this is no")
 	}
+	panic("this is no")
 }

@@ -6,6 +6,7 @@ import (
 	"text/template"
 )
 
+// ConfigurationTemplate is a template of dbyml settings.
 const ConfigurationTemplate = `---
 # file: dbyml.yml
 # This is a configration file used by go-dbyml.
@@ -83,6 +84,7 @@ registry:
     {{- end }}
 `
 
+// MakeTemplate makes a dbyml setting file from a template.
 func MakeTemplate(config *Configuration) {
 	tmpl := template.Must(template.New("ConfigurationTemplate").Parse(ConfigurationTemplate))
 

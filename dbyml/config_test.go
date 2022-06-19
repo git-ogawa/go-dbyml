@@ -3,6 +3,7 @@ package dbyml
 import (
 	"encoding/base64"
 	"encoding/json"
+
 	// "fmt"
 	"testing"
 
@@ -24,7 +25,10 @@ func TestEncodeDecoder(t *testing.T) {
 	encode := registry.BasicAuth()
 	b, _ := base64.URLEncoding.DecodeString(encode)
 	var decode map[string]string
-	json.Unmarshal(b, &decode)
+	err := json.Unmarshal(b, &decode)
+	if err != nil {
+		panic(err)
+	}
 
 	assert.Equal(t, auth, decode)
 }

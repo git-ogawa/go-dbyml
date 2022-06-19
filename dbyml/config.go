@@ -55,7 +55,10 @@ func LoadConfig(path string) (conf *Configuration) {
 	if err != nil {
 		panic(err)
 	}
-	yaml.Unmarshal([]byte(data), &conf)
+	err = yaml.Unmarshal([]byte(data), &conf)
+	if err != nil {
+		panic(err)
+	}
 	conf.ImageInfo.SetProperties()
 	return conf
 }
@@ -63,9 +66,5 @@ func LoadConfig(path string) (conf *Configuration) {
 // ConfigExists checks if the input config exists.
 func ConfigExists(path string) bool {
 	_, err := os.Stat(path)
-	if err != nil {
-		return false
-	} else {
-		return true
-	}
+	return err == nil
 }

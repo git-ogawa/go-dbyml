@@ -1,4 +1,5 @@
-FROM alpine:latest
+FROM alpine:3.16.0
+
 ARG key1
 RUN echo "$key1" > arg.txt && \
     cat arg.txt && \
