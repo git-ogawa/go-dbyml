@@ -17,6 +17,10 @@ jobs:
           command: docker-compose --project-directory testdata -f testdata/docker-compose.yml up -d
 
       - run:
+          name: Pull docker image
+          command: docker pull moby/buildkit:v0.10.3
+
+      - run:
           name: Go test
           command: |
             go test  -coverprofile=cover.out dbyml/* -v

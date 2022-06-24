@@ -1,15 +1,30 @@
 # go-dbyml
 
 [![License](https://img.shields.io/github/license/git-ogawa/go-dbyml)](https://github.com/git-ogawa/go-dbyml/blob/main/LICENSE)
+[![Release](https://img.shields.io/github/v/release/git-ogawa/go-dbyml)](https://github.com/git-ogawa/go-dbyml/releases)
+[![Go Reference](https://pkg.go.dev/badge/github.com/git-ogawa/go-dbyml.svg)](https://pkg.go.dev/github.com/git-ogawa/go-dbyml)
+
 [![build](https://github.com/git-ogawa/go-dbyml/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/git-ogawa/go-dbyml/actions/workflows/build.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/git-ogawa/go-dbyml)](https://goreportcard.com/report/github.com/git-ogawa/go-dbyml)
-[![Release](https://img.shields.io/github/v/release/git-ogawa/go-dbyml)](https://github.com/git-ogawa/go-dbyml/releases)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/86cff2a078d0455f945951c4474e9424)](https://www.codacy.com/gh/git-ogawa/go-dbyml/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=git-ogawa/go-dbyml&amp;utm_campaign=Badge_Grade)
 [![git-ogawa](https://circleci.com/gh/git-ogawa/go-dbyml.svg?style=svg)](https://circleci.com/gh/git-ogawa/go-dbyml)
 
 Go-dbyml is a CLI tool to build a docker image with build options loaded from yaml. Instead of running the `docker build` with many options, write options in config file, build your docker image with them. It helps you to manage build process more readable and flexible.
 
 Go-dbyml is a substitute of [git-ogawa/dbyml](https://github.com/git-ogawa/dbyml) with golang.
+
+
+# Table of Contents
+- [Install](#install)
+- [Preparation](#preparation)
+- [Usage](#usage)
+- [Build with buildkit](#build-with-buildkit)
+- [Configuration](#configuration)
+  - [Basic settings](#basic-settings)
+  - [Registry](#registry)
+  - [Buildkit](#buildkit)
+  - [Examples](#examples)
+- [Notes](#notes)
 
 
 ## Install
@@ -40,8 +55,8 @@ $ go-dbyml
 After successfully building, the docker image will be created.
 ```
 $ docker images
-REPOSITORY                                                          TAG                 IMAGE ID       CREATED         SIZE
-go-dbyml-sample                                                     latest              cf55541823c7   5 hours ago     5.6MB
+REPOSITORY           TAG                 IMAGE ID       CREATED         SIZE
+go-dbyml-sample      latest              cf55541823c7   5 hours ago     5.6MB
 ```
 
 
@@ -49,7 +64,69 @@ Go-dbyml has the following features for image build (these are the same as [git-
 - [Set build-args and labels in image](https://github.com/git-ogawa/dbyml#build-args-and-labels)
 - [Push the image to a private registry](https://github.com/git-ogawa/dbyml#push-to-repository)
 
-Most of features work by replacing `dbyml` with `go-dbyml`, but there are some differences (see below).
+Most of features work by replacing `dbyml` with `go-dbyml`, but there are some differences (see [Notes](#notes)).
+
+
+## Build with buildkit
+Go-dbyml supports image build with [buildkit](https://github.com/moby/buildkit). The build with buildkit enables you to build multi-platform image and export and import build cache to external registry.
+
+
+Additional settings are required in configuration file in order to enable buildkit. See [Buildkit](#buildkit).
+
+# Configuration
+The configuration about go-dbyml are managed by configuration file `dbyml.yml` written in yaml syntax. The Settings are automatically loaded from the file in current directory when run go-dbyml. Run `go-dbyml --init` to generate a config file from template.
+
+
+## Basic settings
+The image section defines the basic settings about image to be built.
+
+- `name`: The name of image.
+- `tag`: The tag of image.
+- `path`: Path to directory where Dockerfile exists.
+- `dockerfile`: The filename of Dockerfile.
+- `build_args`: The build-args used on build. These are passed as `docker build --build-arg [args]`.
+- `label`: The labels used on build. These are passed as `docker build --label [labels]`.
+- `docker_host`: URL to the Docker server.
+
+## Registry
+The registry section defines the registry information to which the built image is pushed.
+
+- `enabled`: Set true to enable pushing image to a registry.
+- `host`: Registry hostname including port.
+- `insecure`: Set true to allow insecure server connections.
+- `auth`: Credentials used when connect for auth-registry.
+
+## Buildkit
+The buildkit section defines the settings about buildkit. To build a image with buildkit, add the `buildkit` section in configuration file and set `enabled` to true.
+
+### output
+The output field sets output format of the image to be built. Only `Image` is supported now, which means the built image will be pushed the specified registry.
+
+- `type`: Set `image`
+- `name`: Set registry and image. e.g. `[registry]:[port]/[project]/[image]:[tag]`.
+- `insecure`: Set true if push the image insecure registry such as insecure private registry. false otherwise.
+
+### cache
+The cache field sets import and export build cache. See [Cache](https://github.com/moby/buildkit#cache) for details.
+
+
+#### export
+
+- `type`: `inline` or `registry`.
+- `value`: Set registry and image. e.g. `[registry]:[port]/[project]/[image]:[tag]` if type is registry.
+
+
+#### import
+
+- `type`: `registry`.
+- `value`: Set registry and image. e.g. `[registry]:[port]/[project]/[image]:[tag]` if type is registry.
+
+
+### platform
+If you want to build a image supports multi-platform, Set the list of architectures to be supported in `platform` field.
+
+## Examples
+See [examples/dbyml.yml](examples/dbyml.yml) for an example of configuration.
 
 
 ## Notes
@@ -84,7 +161,7 @@ registry:
 
 
 ### Buildx section
-The multi-platform build using `buildx` does not be supported yet, so buildx section in config file does not work now.
+Build with buildkit which works like buildx has been supported since v1.1.0.
 
 
 ### TLS section

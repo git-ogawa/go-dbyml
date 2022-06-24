@@ -22,6 +22,8 @@ type RegistryInfo struct {
 
 	// credentials settings to a registry
 	Auth map[string]string `yaml:"auth"`
+
+	Insecure bool `yaml:"insecure"`
 }
 
 // NewRegistryInfo creates a new RegistryInfo struct with default values.

@@ -62,10 +62,12 @@ registry:
   # host: Registry name or ip address and port.
   host: myregistry.com:5000
 
-  # project:
-  # When set the project, the image to be pushed to the registry will be {host}:{port}/{project}/{name}:{tag},
+  # project: When set the project, the image to be pushed to the registry will be {host}:{port}/{project}/{name}:{tag},
   # otherwise {host}:{port}/{name}:{tag}
   project: public
+
+  # insecure: Set true to allow insecure server connections.
+  insecure: false
 
   # auth: Credentials for a registry. This will be used when push a image to basic-auth registry.
   auth:
@@ -74,3 +76,35 @@ registry:
 
     # password: Registry auth password
     password:
+
+# The buildkit section manages the settings when build with buildkit.
+buildkit:
+  # enabled: Set true to enable build with buildkit.
+  enabled: true
+  # output: The output field sets output format of the image to be built
+  output:
+    # type: Type of output image.
+    type: image
+    # name: Set registry and image. e.g. `[registry]:[port]/[project]/[image]:[tag]`
+    name: myregistry.com/go-dbyml-sample:latest
+    # insecure: Set true if push the image insecure registry such as insecure private registry
+    insecure: false
+  # The cache field sets import and export build cache.
+  cache:
+    # export: Export settings of build cache.
+    # Type must be either inline or registry. Set inline to export the cache embed with the image and pushing them to registry together.
+    # Set registry to export build cache to the specified registry. In this case, set the registry in value field. e.g.`[registry]:[port]/[project]/[image]:[tag]`.
+    export:
+      type: inline
+      value:
+    # import: Import settings of build cache.
+    # Type must be registry. Set registry to import build cache from the specified registry. In this case, set the registry in value field. e.g.`[registry]:[port]/[project]/[image]:[tag]`.
+    import:
+      type: registry
+      value: myregistry.com/go-dbyml-sample:latest
+  # platform: Set the list of architectures if want to build  a image that support multi-platform.
+  platform:
+    - linux/amd64
+    - linux/arm64
+  # remove: Set true to remove a builder container after build is successfully completed.
+  remove: true
