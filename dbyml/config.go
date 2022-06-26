@@ -13,6 +13,7 @@ type Configuration struct {
 	ImageInfo    ImageInfo    `yaml:"image"`
 	BuildInfo    BuildInfo    `yaml:"build"`
 	RegistryInfo RegistryInfo `yaml:"registry"`
+	BuildkitInfo BuildkitInfo `yaml:"buildkit"`
 }
 
 // NewConfiguration makes Configuration struct with default values.
@@ -21,6 +22,7 @@ func NewConfiguration() *Configuration {
 	config.ImageInfo = *NewImageInfo()
 	config.BuildInfo = *NewBuildInfo()
 	config.RegistryInfo = *NewRegistryInfo()
+	config.BuildkitInfo = *NewBuildkitInfo()
 	return config
 }
 

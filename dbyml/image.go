@@ -15,29 +15,14 @@ import (
 
 // ImageInfo defines docker image information.
 type ImageInfo struct {
-	// Image name
-	Basename string `yaml:"name"`
-
-	// Image tag
-	Tag string `yaml:"tag"`
-
-	// Image name such as `go-dbyml:latest`
-	ImageName string
-
-	// Path to the directory where Dockerfile exists
-	Path string `yaml:"path"`
-
-	// Dockerfile filename
-	Dockerfile string `yaml:"dockerfile"`
-
-	// Build-args to be passed to image on build
-	BuildArgs map[string]*string `yaml:"build_args"`
-
-	// Labels to be passed to image on build
-	Labels map[string]string `yaml:"label"`
-
-	// Docker host such as "unix:///var/run/docker.sock"
-	DockerHost string `yaml:"docker_host"`
+	Basename   string             `yaml:"name"`        // Image name
+	Tag        string             `yaml:"tag"`         // Image tag
+	ImageName  string             `yaml:"image_name"`  // Image name such as `go-dbyml:latest`
+	Path       string             `yaml:"path"`        // Path to the directory where Dockerfile exists
+	Dockerfile string             `yaml:"dockerfile"`  // Dockerfile filename
+	BuildArgs  map[string]*string `yaml:"build_args"`  // Build-args to be passed to image on build
+	Labels     map[string]string  `yaml:"label"`       // Labels to be passed to image on build
+	DockerHost string             `yaml:"docker_host"` // Docker host such as "unix:///var/run/docker.sock"
 
 	FilePath     string
 	Registry     RegistryInfo

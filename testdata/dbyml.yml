@@ -21,23 +21,26 @@ registry:
   enabled: true
   host: localhost:5550
   project: public
+  insecure: true
   auth:
     username: "docker"
     password: "docker"
     ca_cert: "cert"
 
-buildx:
+buildkit:
   enabled: false
-  debug: false
-  instance: multi-builder
-  use_existing_instance: true
+  debug: true
+  output:
+    type: image
+    name: localhost:5550/go-dbyml-sample:latest
+    insecure: true
+  cache:
+    export:
+      type: inline
+      value:
+    import:
+      type: registry
+      value: localhost:5550/go-dbyml-sample:latest
   platform:
     - linux/amd64
-    - linux/arm64
-  type: registry
-  pull_output: true
-  remove_instance: false
-  driver_opt:
-    network: host
-  config:
-    http: true
+  remove: true

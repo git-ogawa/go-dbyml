@@ -19,7 +19,7 @@ func TestConfigNotFound(t *testing.T) {
 	stdout := extractStdout(t, options.Parse)
 	expected := "Config file not found in the current directory.\n"
 	expected += "Run the following commands to generate config file.\n\n"
-	expected += "dbyml --init         Generate config file interactively or non-interactively."
+	expected += "$ dbyml --init"
 	assert.Equal(t, expected, stdout)
 
 	options = CLIoptions{"notexists.yml", false}

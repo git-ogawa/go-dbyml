@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strings"
 )
 
@@ -72,4 +73,55 @@ func showMapElement(name string, iter *reflect.MapIter) {
 		}
 		cnt++
 	}
+}
+
+func getTarRecursive(dir string) (buf *bytes.Buffer) {
+	buf = new(bytes.Buffer)
+	tw := tar.NewWriter(buf)
+	defer tw.Close()
+
+	if err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		f, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		b, err := ioutil.ReadAll(f)
+		if err != nil {
+			return err
+		}
+
+		// Replace top directory with build
+		str := regexp.MustCompile("^[^/]+")
+		path = str.ReplaceAllString(path, "build")
+
+		// Write header
+		if err := tw.WriteHeader(&tar.Header{
+			Name:    path,
+			Mode:    int64(info.Mode()),
+			ModTime: info.ModTime(),
+			Size:    info.Size(),
+		}); err != nil {
+			return err
+		}
+
+		// Write body
+		_, err = tw.Write(b)
+		if err != nil {
+			log.Fatal(err, " :unable to write tar body")
+		}
+		return nil
+	}); err != nil {
+		panic(err)
+	}
+	return buf
 }

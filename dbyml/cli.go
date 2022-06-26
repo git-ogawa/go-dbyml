@@ -16,6 +16,7 @@ package dbyml
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/akamensky/argparse"
 )
@@ -103,7 +104,7 @@ func (options *CLIoptions) Parse() {
 			msg := "Config file not found in the current directory.\nRun the following commands to generate config file."
 			fmt.Println(msg)
 			fmt.Println()
-			fmt.Printf("%-20v Generate config file interactively or non-interactively.\n", "dbyml --init")
+			fmt.Println("$ dbyml --init")
 		}
 	}
 }
@@ -117,6 +118,69 @@ func ExecBuild(path string) {
 		config.ShowConfig()
 	}
 
+	if config.BuildkitInfo.Enabled {
+		err := buildkit(path, config)
+		if err != nil {
+			fmt.Printf("Error has occurred: %v\n", err)
+			fmt.Println("\x1b[31mBuild Failed\x1b[0m")
+			os.Exit(1)
+		}
+	} else {
+		err := dockerBuild(path, config)
+		if err != nil {
+			fmt.Printf("Error has occurred: %v\n", err)
+			fmt.Println("\x1b[31mBuild Failed\x1b[0m")
+			os.Exit(1)
+		}
+	}
+}
+
+func buildkit(path string, config *Configuration) error {
+	fmt.Println()
+	PrintCenter("Build start", 30, "-")
+	fmt.Println()
+
+	cmd := config.BuildkitInfo.ParseOptions(config.ImageInfo)
+	builder := NewBuilder()
+	builder.AddCmd(cmd...)
+
+	if !builder.Image.Exists() {
+		fmt.Printf("Image %s not found and will be pulled from docker hub.\n", buildkitImageName)
+		err := builder.Image.Pull()
+		if err != nil {
+			return err
+		}
+	}
+
+	if !builder.Exists() {
+		err := builder.Setup(&config.RegistryInfo)
+		if err != nil {
+			return err
+		}
+	} else {
+		err := builder.SetContainerID()
+		if err != nil {
+			return err
+		}
+	}
+
+	builder.Start()
+	time.Sleep(time.Second * 3)
+	builder.CopyFiles(config.ImageInfo.Path, "/tmp")
+	err := builder.Build(config.BuildInfo.Verbose)
+	if err != nil {
+		return err
+	}
+
+	if config.BuildkitInfo.Remove {
+		builder.Remove()
+	} else {
+		builder.Stop()
+	}
+	return nil
+}
+
+func dockerBuild(path string, config *Configuration) error {
 	fmt.Println()
 	PrintCenter("Build start", 30, "-")
 	fmt.Println()
@@ -124,9 +188,7 @@ func ExecBuild(path string) {
 	PrintCenter("Build finish", 30, "-")
 	fmt.Println()
 	if err != nil {
-		fmt.Printf("Error has occurred during build: %v\n", err)
-		fmt.Println("\x1b[31mBuild Failed\x1b[0m")
-		os.Exit(1)
+		return err
 	}
 
 	fmt.Printf("Image %v successfully built.\n", config.ImageInfo.ImageName)
@@ -141,11 +203,10 @@ func ExecBuild(path string) {
 
 		fmt.Println()
 		if err != nil {
-			fmt.Printf("Error has occurred during push: %v\n", err)
-			fmt.Println("\x1b[31mPush Failed\x1b[0m")
-			os.Exit(1)
+			return err
 		}
 
 		fmt.Printf("Image %v successfully pushed.\n", config.ImageInfo.FullName)
 	}
+	return nil
 }
