@@ -9,6 +9,7 @@ image:
   label:
     label1: label-var1
     label2: label-var2
+    envlabel: ${PWD}
   docker_host: unix:///var/run/docker.sock
   # docker_host: tcp://192.168.3.20:2375
 

@@ -20,9 +20,10 @@ Go-dbyml is a substitute of [git-ogawa/dbyml](https://github.com/git-ogawa/dbyml
 - [Usage](#usage)
 - [Build with buildkit](#build-with-buildkit)
 - [Configuration](#configuration)
-  - [Basic settings](#basic-settings)
+  - [Image](#image)
   - [Registry](#registry)
   - [Buildkit](#buildkit)
+  - [Environment variables](#environment-variables)
   - [Examples](#examples)
 - [Notes](#notes)
 
@@ -41,7 +42,7 @@ To use go-dbyml, Docker Engine must be installed on host for build and run docke
 
 
 ## Usage
-To build your image from Dockerfile, you must make `Dockerfile` and configuration file `dbyml.yml`. The file `dbyml.yml` is written in yaml syntax and contains the settings related to image build such as tags, build-args or label. To make the file, copy the contents from [examples/dbyml.yml](https://github.com/git-ogawa/go-dbyml/blob/develop/examples/dbyml.yml) or make by the following command.
+To build your image from Dockerfile, you must make `Dockerfile` and configuration file `dbyml.yml`. The file `dbyml.yml` is written in yaml syntax and contains the settings related to image build such as tags, build-args or label. To make the file, copy the contents from [examples/dbyml.yml](examples/dbyml.yml) or make by the following command.
 
 ```
 $ go-dbyml --init
@@ -77,7 +78,17 @@ Additional settings are required in configuration file in order to enable buildk
 The configuration about go-dbyml are managed by configuration file `dbyml.yml` written in yaml syntax. The Settings are automatically loaded from the file in current directory when run go-dbyml. Run `go-dbyml --init` to generate a config file from template.
 
 
-## Basic settings
+The `dbyml.yml` consists of the following sections at the top level.
+
+- Image
+- Build
+- Registry
+- Buildkit
+
+See the following description and [examples/dbyml.yml](examples/dbyml.yml) to know how to set these values.
+
+
+## Image
 The image section defines the basic settings about image to be built.
 
 - `name`: The name of image.
@@ -125,6 +136,27 @@ The cache field sets import and export build cache. See [Cache](https://github.c
 ### platform
 If you want to build a image supports multi-platform, Set the list of architectures to be supported in `platform` field.
 
+
+## Environment variables
+You can use environment variables in config file.
+
+- To use the environment variable, set `${VARIABLE_NAME}`
+- To use default value, set `${VARIABLE_NAME:-DEFAULT_VALUE}`.
+
+```yaml
+image:
+  name: ${IMAGE_NAME}         # Set the value of ${IMAGE_NAME}.
+  tag: ${TAG_NAME:-latest}    # Set latest if ${TAG_NAME} is undefined.
+```
+
+An error will be raised on build if the environment variable is undefined.
+
+```yaml
+image:
+  name: ${UNDEFINED}        # >> ENV ${UNDEFINED} not defined.
+```
+
+
 ## Examples
 See [examples/dbyml.yml](examples/dbyml.yml) for an example of configuration.
 
@@ -134,7 +166,7 @@ Compared to [git-ogawa/dbyml](https://github.com/git-ogawa/dbyml), there are som
 
 
 ### ENV variables
-The environment variable expression does not be supported yet.
+The environment variable expression has been supported since v1.2.0.
 
 
 ### Build section
