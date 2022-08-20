@@ -7,7 +7,7 @@ import (
 // Module name and version
 const (
 	moduleName = "go-dbyml"
-	version    = "v1.2.0"
+	version    = "v1.2.1"
 )
 
 // ShowVersion shows module version.

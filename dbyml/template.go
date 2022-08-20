@@ -24,7 +24,7 @@ image:
   tag: {{ or .ImageInfo.Tag "latest" }}
 
   # path: Path to a directory containing Dockerfile.
-  path: {{ or .ImageInfo.Path "." }}
+  path: {{ or .ImageInfo.Context "." }}
 
   # dockerfile: Filename of Dockerfile.
   dockerfile: {{ or .ImageInfo.Dockerfile "Dockerfile" }}

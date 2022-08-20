@@ -1,7 +1,7 @@
 image:
   name: go-dbyml-sample
   tag: latest
-  path: testdata
+  path: testdata/dockerfile_ignore
   dockerfile: Dockerfile
   build_args:
     key1: value2
@@ -11,7 +11,6 @@ image:
     label2: label-var2
     envlabel: ${PWD}
   docker_host: unix:///var/run/docker.sock
-  # docker_host: tcp://192.168.3.20:2375
 
 build:
   target: ''
@@ -19,7 +18,7 @@ build:
   verbose: true
 
 registry:
-  enabled: true
+  enabled: false
   host: localhost:5550
   project: public
   insecure: true

@@ -17,7 +17,10 @@ func TestParseOptions(t *testing.T) {
 	buildkitInfo.Output["name"] = "myregistry.com:5000/test:latest"
 	buildkitInfo.Output["value"] = map[string]string{"type": "myregistry.com:5000/test:latest"}
 	buildkitInfo.Cache["export"] = map[string]string{"type": "inline"}
-	buildkitInfo.Cache["import"] = map[string]string{"type": "registry", "value": "myregistry.com:5000/test:latest"}
+	buildkitInfo.Cache["import"] = map[string]string{
+		"type":  "registry",
+		"value": "myregistry.com:5000/test:latest",
+	}
 	buildkitInfo.Platform = []string{"linux/amd64", "linux/arm64"}
 
 	imageInfo := NewImageInfo()
@@ -79,6 +82,7 @@ func TestBuilderStop(t *testing.T) {
 	builder.Remove()
 }
 
+// Build a image with buildkitd
 func TestBuilderBuild(t *testing.T) {
 	pwd, _ := os.Getwd()
 	root, _ := filepath.Abs("../")
@@ -91,7 +95,7 @@ func TestBuilderBuild(t *testing.T) {
 	builder.Setup(registry)
 	builder.Start()
 	time.Sleep(time.Second * 2)
-	builder.CopyFiles("testdata", "/tmp")
+	builder.CopyFiles("testdata/dockerfile_buildkit", "/tmp")
 	builder.Build(true)
 	builder.Remove()
 	os.Chdir(pwd)

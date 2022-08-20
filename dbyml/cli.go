@@ -166,7 +166,7 @@ func buildkit(path string, config *Configuration) error {
 
 	builder.Start()
 	time.Sleep(time.Second * 3)
-	builder.CopyFiles(config.ImageInfo.Path, "/tmp")
+	builder.CopyFiles(config.ImageInfo.Context, "/tmp")
 	err := builder.Build(config.BuildInfo.Verbose)
 	if err != nil {
 		return err

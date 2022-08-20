@@ -31,16 +31,6 @@ func TestConfigNotFound(t *testing.T) {
 	os.Chdir(pwd)
 }
 
-// func TestCLIShowHelp(t *testing.T) {
-// 	org := os.Args
-// 	testArgs := []string{"dbyml", "-h"}
-// 	os.Args = testArgs
-
-// 	options, _ := GetArgs()
-// 	options.Parse()
-// 	os.Args = org
-// }
-
 func TestShowVersion(t *testing.T) {
 	org := os.Args
 	testArgs := []string{"dbyml", "-v"}
@@ -58,7 +48,25 @@ func TestCLIBuild(t *testing.T) {
 
 	// Set args
 	org := os.Args
-	path, _ := filepath.Abs("testdata/dbyml.yml")
+	path, _ := filepath.Abs("testdata/dockerfile_standard/dbyml.yml")
+	testArgs := []string{"dbyml", "-c", path}
+	os.Args = testArgs
+
+	options, _ := GetArgs()
+	options.Parse()
+
+	os.Args = org
+	os.Chdir(pwd)
+}
+
+func TestCLIWithContext(t *testing.T) {
+	pwd, _ := os.Getwd()
+	root, _ := filepath.Abs("../")
+	os.Chdir(root)
+
+	// Set args
+	org := os.Args
+	path, _ := filepath.Abs("testdata/dockerfile_ignore/dbyml.yml")
 	testArgs := []string{"dbyml", "-c", path}
 	os.Args = testArgs
 

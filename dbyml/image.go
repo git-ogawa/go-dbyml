@@ -18,27 +18,27 @@ type ImageInfo struct {
 	Basename   string             `yaml:"name"`        // Image name
 	Tag        string             `yaml:"tag"`         // Image tag
 	ImageName  string             `yaml:"image_name"`  // Image name such as `go-dbyml:latest`
-	Path       string             `yaml:"path"`        // Path to the directory where Dockerfile exists
+	Context    string             `yaml:"path"`        // Path to the directory where Dockerfile exists, is equivalent to build context
 	Dockerfile string             `yaml:"dockerfile"`  // Dockerfile filename
 	BuildArgs  map[string]*string `yaml:"build_args"`  // Build-args to be passed to image on build
 	Labels     map[string]string  `yaml:"label"`       // Labels to be passed to image on build
 	DockerHost string             `yaml:"docker_host"` // Docker host such as "unix:///var/run/docker.sock"
 
-	FilePath     string
-	Registry     RegistryInfo
-	BuildInfo    BuildInfo
-	FullName     string
-	DockerClient *client.Client
+	DockerfilePath string
+	Registry       RegistryInfo
+	BuildInfo      BuildInfo
+	FullName       string
+	DockerClient   *client.Client
 }
 
 // NewImageInfo creates a new ImageInfo struct with default values.
 func NewImageInfo() *ImageInfo {
 	image := new(ImageInfo)
 	image.Tag = "latest"
-	image.Path = "."
+	image.Context = "."
 	image.Dockerfile = "Dockerfile"
 	image.DockerHost = "unix:///var/run/docker.sock"
-	image.FilePath = image.Path + "/" + image.Dockerfile
+	image.DockerfilePath = image.Context + "/" + image.Dockerfile
 	image.Registry = *NewRegistryInfo()
 	image.BuildInfo = *NewBuildInfo()
 	return image
@@ -47,7 +47,7 @@ func NewImageInfo() *ImageInfo {
 // SetProperties sets some properties when build an image.
 func (image *ImageInfo) SetProperties() {
 	image.ImageName = image.Basename + ":" + image.Tag
-	image.FilePath = image.Path + "/" + image.Dockerfile
+	image.DockerfilePath = image.Context + "/" + image.Dockerfile
 	image.SetDockerClient()
 }
 
@@ -77,14 +77,13 @@ func (image ImageInfo) ShowProperties() {
 
 // Build runs image build.
 func (image *ImageInfo) Build() error {
-	buf := getTarContext(image.FilePath)
+	buf := GetBuildContext(image.Context)
 	tar := bytes.NewReader(buf.Bytes())
 	ctx := context.Background()
 
 	options := types.ImageBuildOptions{
-		Context:    tar,
 		NoCache:    image.BuildInfo.NoCache,
-		Dockerfile: image.FilePath,
+		Dockerfile: image.DockerfilePath,
 		Remove:     true,
 		BuildArgs:  image.BuildArgs,
 		Labels:     image.Labels,
