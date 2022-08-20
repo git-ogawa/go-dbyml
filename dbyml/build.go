@@ -66,7 +66,10 @@ func (buildkit *BuildkitInfo) ParseOptions(imageInfo ImageInfo) []string {
 
 		importCache := buildkit.Cache["import"].(map[string]string)["type"]
 		if importCache == "registry" {
-			cmd = fmt.Sprintf("type=registry,ref=%s", buildkit.Cache["import"].(map[string]string)["value"])
+			cmd = fmt.Sprintf(
+				"type=registry,ref=%s",
+				buildkit.Cache["import"].(map[string]string)["value"],
+			)
 		}
 		opts = append(opts, "--import-cache", cmd)
 	}
@@ -113,8 +116,8 @@ func NewBuilder() (builder *Builder) {
 	builder = new(Builder)
 	builder.Name = "dbyml-buildkit-builder"
 	builder.Image = BuildkitImage{buildkitImageName}
-	builder.Context = "/tmp/build"
-	builder.DockerfilePath = "/tmp/build"
+	builder.Context = "/tmp"
+	builder.DockerfilePath = "/tmp"
 	builder.Cmd = []string{
 		"buildctl",
 		"build",
@@ -125,8 +128,16 @@ func NewBuilder() (builder *Builder) {
 		"--local",
 		fmt.Sprintf("dockerfile=%s", builder.DockerfilePath),
 	}
-	builder.Config = &container.Config{Image: builder.Image.Name, Entrypoint: dockerStrSlice.StrSlice([]string{"buildkitd", "--config", "/etc/buildkitd.toml"})}
-	builder.HostConfig = &container.HostConfig{NetworkMode: "host", Privileged: true}
+	builder.Config = &container.Config{
+		Image: builder.Image.Name,
+		Entrypoint: dockerStrSlice.StrSlice(
+			[]string{"buildkitd", "--config", "/etc/buildkitd.toml"},
+		),
+	}
+	builder.HostConfig = &container.HostConfig{
+		NetworkMode: "host",
+		Privileged:  true,
+	}
 	builder.Client, _ = client.NewClientWithOpts(client.FromEnv)
 	return builder
 }
@@ -148,13 +159,11 @@ func (builder *Builder) Setup(config *RegistryInfo) error {
 		return err
 	}
 
-	err = builder.CopyFiles(path, "/etc")
-	if err != nil {
+	if err = builder.CopyFiles(path, "/etc"); err != nil {
 		return err
 	}
 
-	err = os.Remove(path)
-	if err != nil {
+	if err = os.Remove(path); err != nil {
 		return err
 	}
 
@@ -186,7 +195,10 @@ func (builder *Builder) SetContainerID() error {
 // Inspect gets a builder information.
 func (builder *Builder) Inspect() (types.ContainerJSON, error) {
 	var json types.ContainerJSON
-	ret, err := builder.Client.ContainerList(context.Background(), types.ContainerListOptions{All: true})
+	ret, err := builder.Client.ContainerList(
+		context.Background(),
+		types.ContainerListOptions{All: true},
+	)
 	if err != nil {
 		return json, err
 	}
@@ -206,7 +218,14 @@ func (builder *Builder) Inspect() (types.ContainerJSON, error) {
 
 // Create creates a builder container.
 func (builder *Builder) Create() error {
-	body, err := builder.Client.ContainerCreate(context.Background(), builder.Config, builder.HostConfig, &network.NetworkingConfig{}, &specs.Platform{}, builder.Name)
+	body, err := builder.Client.ContainerCreate(
+		context.Background(),
+		builder.Config,
+		builder.HostConfig,
+		&network.NetworkingConfig{},
+		&specs.Platform{},
+		builder.Name,
+	)
 	if err != nil {
 		return err
 	}
@@ -216,7 +235,11 @@ func (builder *Builder) Create() error {
 
 // Start starts a builder container.
 func (builder *Builder) Start() error {
-	return builder.Client.ContainerStart(context.Background(), builder.ID, types.ContainerStartOptions{})
+	return builder.Client.ContainerStart(
+		context.Background(),
+		builder.ID,
+		types.ContainerStartOptions{},
+	)
 }
 
 // Stop stops a builder container.
@@ -227,7 +250,11 @@ func (builder *Builder) Stop() error {
 
 // Remove removes a builder container.
 func (builder *Builder) Remove() error {
-	return builder.Client.ContainerRemove(context.Background(), builder.ID, types.ContainerRemoveOptions{RemoveVolumes: true, RemoveLinks: false, Force: true})
+	return builder.Client.ContainerRemove(
+		context.Background(),
+		builder.ID,
+		types.ContainerRemoveOptions{RemoveVolumes: true, RemoveLinks: false, Force: true},
+	)
 }
 
 // CopyFiles copies directory in client to builder container.
@@ -237,18 +264,29 @@ func (builder *Builder) CopyFiles(path string, dst string) error {
 		AllowOverwriteDirWithFile: true,
 		CopyUIDGID:                false,
 	}
-	fileInfo, err := os.Stat(path)
-	if err != nil {
-		return err
-	}
-	if fileInfo.IsDir() {
-		return builder.Client.CopyToContainer(context.Background(), builder.ID, dst, getTarRecursive(path), opts)
-	}
-	return builder.Client.CopyToContainer(context.Background(), builder.ID, dst, getTarContext(path), opts)
+	return builder.Client.CopyToContainer(
+		context.Background(),
+		builder.ID,
+		dst,
+		GetBuildkitContext(path),
+		opts,
+	)
 }
 
 // Build builds a image in a builder.
 func (builder *Builder) Build(debug bool) error {
+	if debug {
+		fmt.Println("The following command will be run in buildkit container.")
+		re := regexp.MustCompile(`\s{1}-{2}`)
+		cmd := strings.Join(builder.Cmd, " ")
+		cmd = re.ReplaceAllString(cmd, "\n\t--")
+		fmt.Println(cmd)
+	}
+	return builder.Exec(builder.Cmd)
+}
+
+// Exec runs a command in buildkit container.
+func (builder *Builder) Exec(cmd []string) error {
 	execConfig := types.ExecConfig{
 		Privileged:   true,
 		AttachStdin:  true,
@@ -256,14 +294,7 @@ func (builder *Builder) Build(debug bool) error {
 		AttachStderr: true,
 		Tty:          true,
 		Detach:       false,
-		Cmd:          strslice.StrSlice(builder.Cmd),
-	}
-	if debug {
-		fmt.Println("The following command will be run in buildkit container.")
-		re := regexp.MustCompile(`\s{1}-{2}`)
-		cmd := strings.Join(builder.Cmd, " ")
-		cmd = re.ReplaceAllString(cmd, "\n\t--")
-		fmt.Println(cmd)
+		Cmd:          strslice.StrSlice(cmd),
 	}
 
 	// Create a new exec configuration to run an exec process.
@@ -273,7 +304,11 @@ func (builder *Builder) Build(debug bool) error {
 	}
 
 	// Run the exec process and attach it.
-	hijackRes, _ := builder.Client.ContainerExecAttach(context.Background(), res.ID, types.ExecStartCheck{})
+	hijackRes, _ := builder.Client.ContainerExecAttach(
+		context.Background(),
+		res.ID,
+		types.ExecStartCheck{},
+	)
 	defer func() error {
 		return hijackRes.Conn.Close()
 	}()
