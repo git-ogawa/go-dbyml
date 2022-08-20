@@ -6,3 +6,8 @@ run:
 linters:
   disable:
     - errcheck
+issues:
+  exclude-rules:
+    - linters:
+        - staticcheck
+      text: "SA4009"

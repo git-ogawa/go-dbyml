@@ -20,4 +20,4 @@ tmp/
 *cover*
 
 dist/
-*dbyml.yml*
+*.sh

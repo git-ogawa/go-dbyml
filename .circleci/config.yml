@@ -14,7 +14,11 @@ jobs:
 
       - run:
           name: Create docker containers
-          command: docker-compose --project-directory testdata -f testdata/docker-compose.yml up -d
+          command: >
+            docker-compose
+            --project-directory testdata
+            -f testdata/docker-compose.yml
+            up -d
 
       - run:
           name: Pull docker image
